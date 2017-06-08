@@ -8,18 +8,55 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITableViewDataSource {
+
+    // MARK: Properties
+
+    @IBOutlet weak var tableView: UITableView!
+
+    var names = [String]()
+
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
     }
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+    // MARK: UITableViewDataSource
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return names.count
     }
 
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+
+        let name = names[indexPath.row]
+
+        if let label = cell.textLabel {
+            label.text = name
+        }
+
+        return cell
+    }
+
+    // MARK: Actions
+    
+    @IBAction func addName(_ sender: UIBarButtonItem) {
+        let alert = UIAlertController(title: "New Name", message: "Add a new name", preferredStyle: .alert)
+        let saveAction = UIAlertAction(title: "Save", style: .default, handler: { (action:UIAlertAction) in
+            let textField = alert.textFields!.first
+            self.names.append(textField!.text!)
+            self.tableView.reloadData()
+        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+
+        alert.addTextField(configurationHandler: nil)
+
+        alert.addAction(saveAction)
+        alert.addAction(cancelAction)
+
+        present(alert, animated: true, completion: nil)
+    }
 
 }
 
