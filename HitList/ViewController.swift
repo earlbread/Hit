@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController, UITableViewDataSource {
 
@@ -14,7 +15,7 @@ class ViewController: UIViewController, UITableViewDataSource {
 
     @IBOutlet weak var tableView: UITableView!
 
-    var names = [String]()
+    var people = [NSManagedObject]()
 
 
     override func viewDidLoad() {
@@ -24,16 +25,16 @@ class ViewController: UIViewController, UITableViewDataSource {
     // MARK: UITableViewDataSource
 
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return names.count
+        return people.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
 
-        let name = names[indexPath.row]
+        let person = people[indexPath.row]
 
         if let label = cell.textLabel {
-            label.text = name
+            label.text = person.value(forKey: "name") as? String
         }
 
         return cell
@@ -45,7 +46,7 @@ class ViewController: UIViewController, UITableViewDataSource {
         let alert = UIAlertController(title: "New Name", message: "Add a new name", preferredStyle: .alert)
         let saveAction = UIAlertAction(title: "Save", style: .default, handler: { (action:UIAlertAction) in
             let textField = alert.textFields!.first
-            self.names.append(textField!.text!)
+            self.saveName(name: textField!.text!)
             self.tableView.reloadData()
         })
         let cancelAction = UIAlertAction(title: "Cancel", style: .default, handler: nil)
@@ -56,6 +57,25 @@ class ViewController: UIViewController, UITableViewDataSource {
         alert.addAction(cancelAction)
 
         present(alert, animated: true, completion: nil)
+    }
+
+    // MARK: Private Methods
+
+    private func saveName(name: String) {
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let managedContext = appDelegate.persistentContainer.viewContext
+        let entity = NSEntityDescription.entity(forEntityName: "Person", in: managedContext)
+        let person = NSManagedObject(entity: entity!, insertInto: managedContext)
+
+        person.setValue(name, forKey: "name")
+
+        do {
+            try managedContext.save()
+            people.append(person)
+        } catch let error as NSError {
+            fatalError("Could not save \(error), \(error.userInfo)")
+        }
+
     }
 
 }
