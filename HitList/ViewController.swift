@@ -20,6 +20,18 @@ class ViewController: UIViewController, UITableViewDataSource {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let managedContext = appDelegate.persistentContainer.viewContext
+
+        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Person")
+
+        do {
+            let result = try managedContext.fetch(fetchRequest)
+            people = result
+        } catch let error as NSError {
+            fatalError("Could not fetch \(error), \(error.userInfo)")
+        }
     }
 
     // MARK: UITableViewDataSource
